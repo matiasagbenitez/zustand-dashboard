@@ -1,13 +1,8 @@
-import { DragEvent, useState } from "react";
 import classNames from "classnames";
-import Swal from "sweetalert2";
-import {
-  IoAddOutline,
-  IoCheckmarkCircleOutline,
-} from "react-icons/io5";
+import { IoAddOutline, IoCheckmarkCircleOutline } from "react-icons/io5";
 import { Task, TaskStatus } from "../../interfaces";
 import { SingleTask } from "./SingleTask";
-import { useTaskStore } from "../../stores";
+import { useTasks } from "../../hooks/useTasks";
 
 interface Props {
   title: string;
@@ -16,46 +11,18 @@ interface Props {
 }
 
 export const JiraTasks = ({ title, value, tasks }: Props) => {
-  const isDragging = useTaskStore((state) => !!state.draggingTaskId);
-  const onTaskDrop = useTaskStore((state) => state.onTaskDrop);
-  const addTask = useTaskStore((state) => state.addTask);
-  const [onDragOver, setOnDragOver] = useState(false);
+  const {
+    // Properties
+    isDragging,
 
-  const  handleAddTask = async () => {
-    const { isConfirmed, value: text } = await Swal.fire({
-      title: "Nueva tarea",
-      input: "text",
-      inputLabel: "Nombre de la tarea",
-      inputPlaceholder: "Ingrese el nombre de la tarea",
-      showCancelButton: true,
-      
-      inputValidator: (value) => {
-        if (!value) {
-          return "Debe ingresar el nombre de la tarea";
-        }
-      },
-    });
-    if (!isConfirmed) return;
-    addTask(text, value);
-  };
+    // Methods
+    onDragOver,
+    handleAddTask,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+  } = useTasks({ status: value });
 
-  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setOnDragOver(true);
-  };
-
-  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setOnDragOver(false);
-  };
-
-  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setOnDragOver(false);
-    onTaskDrop(value);
-
-  };
-  
   return (
     <div
       onDragOver={handleDragOver}
@@ -65,12 +32,10 @@ export const JiraTasks = ({ title, value, tasks }: Props) => {
         "!text-black border-2  relative flex flex-col rounded-[20px]  bg-white bg-clip-border shadow-3xl shadow-shadow-500  w-full !p-4 3xl:p-![18px]",
         {
           "border-blue-400 border-dashed": isDragging,
-          
         },
         {
           "border-green-500 border-dashed": isDragging && onDragOver,
-          
-        },
+        }
       )}
     >
       {/* Task Header */}
